@@ -9,6 +9,8 @@ class Ship(owner: Int, id: Int, xPos: Double, yPos: Double,
            health: Int, val dockingStatus: DockingStatus, val dockedPlanet: Int,
            val dockingProgress: Int, val weaponCooldown: Int) : Entity(owner, id, xPos, yPos, health, Constants.SHIP_RADIUS) {
 
+    var objective: Objective? = null
+
     fun canDock(planet: Planet): Boolean {
         return getDistanceTo(planet) <= Constants.SHIP_RADIUS + Constants.DOCK_RADIUS + planet.radius
     }

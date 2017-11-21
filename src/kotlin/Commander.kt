@@ -1,9 +1,8 @@
 import halite.*
-import java.lang.Integer.min
 import java.util.*
 
 class Commander(private val gameMap: GameMap): Intelligence {
-    private val self: Player by lazy { gameMap.myPlayer }
+    private val self: Player get() = gameMap.myPlayer
 
     private val ownedPlanets = LinkedList<Planet>()
 
@@ -15,6 +14,10 @@ class Commander(private val gameMap: GameMap): Intelligence {
         return gameMap.allPlanets[id]
     }
 
+    override fun shipExists(id: Int) = this.self.ships.containsKey(id)
+
+    override fun getShip(id: Int) = this.self.ships[id]
+
     override fun isOwn(planet: Planet) = planet.owner == this.self.id
 
     init {
@@ -25,8 +28,23 @@ class Commander(private val gameMap: GameMap): Intelligence {
         }
     }
 
-    fun getNextObjective(): Objective {
-        return this.objectives.first
+    fun assignObjective(ship: Ship): Objective? {
+        val objective = getNextObjective()
+
+        if (objective != null) {
+            Log.log("Assigning $objective to ${ship.id}")
+            objective.assignedShips.add(ship.id)
+            Log.log("$objective now has ${objective.assignedShips.count()} ships assigned")
+        }
+
+        return objective
+    }
+
+    fun getNextObjective(): Objective? {
+        for (objective in this.objectives) {
+            if (objective.isFree()) return objective
+        }
+        return null
     }
 
     fun getPlanetToExplore(ship: Ship): Planet? {

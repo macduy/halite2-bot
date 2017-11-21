@@ -11,16 +11,16 @@ fun main(args: Array<String>) {
         gameMap.updateMap(Networking.readLineIntoMetadata())
         commander.update()
 
-        commander.logObjectives()
-
         gameMap.myPlayer.ships.values
                 .filter { it.dockingStatus == DockingStatus.Undocked }
                 .forEach { ship ->
-                    val objective = commander.getNextObjective()
+
+                    val objective = ship.objective ?: commander.assignObjective(ship)
 
                     when(objective) {
                         is SettlePlanetObjective -> executor.navigateToPlanet(ship, objective.planet)
                         is AttackPlanetObjective -> { }
+                        null -> { }
                     }
                 }
         executor.execute()
