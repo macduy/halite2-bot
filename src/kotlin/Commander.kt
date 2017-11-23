@@ -6,6 +6,9 @@ class Commander(private val gameMap: GameMap): Intelligence {
 
     private val ownedPlanets = LinkedList<Planet>()
 
+    override var freePlanets: Int = 0
+    override var totalPlanets: Int = 0
+
     override var kingdomCenter = Position(0.0, 0.0)
 
     var objectives = LinkedList<Objective>()
@@ -32,9 +35,10 @@ class Commander(private val gameMap: GameMap): Intelligence {
         val objective = getNextObjective()
 
         if (objective != null) {
-            Log.log("Assigning $objective to ${ship.id}")
-            objective.assignedShips.add(ship.id)
-            Log.log("$objective now has ${objective.assignedShips.count()} ships assigned")
+            objective.assign(ship)
+            Log.log("Assign ${ship.id} to $objective ")
+        } else {
+            Log.log("Ship ${ship.id} ran of objectives!")
         }
 
         return objective
@@ -84,7 +88,7 @@ class Commander(private val gameMap: GameMap): Intelligence {
         }
 
         // Remove any invalid objectives
-        this.objectives.filter { it.valid }
+        this.objectives.retainAll { it.valid }
 
         // Sort by score
         this.objectives.sortByDescending { it.score }
@@ -113,6 +117,9 @@ class Commander(private val gameMap: GameMap): Intelligence {
         this.gameMap.planets.values.filterTo(ownedPlanets) {
             it.isOwned && it.owner == this.self.id
         }
+
+        this.totalPlanets = this.gameMap.planets.size
+        this.freePlanets = this.gameMap.planets.values.count { !it.isOwned }
     }
 
     private fun getCenter(entities: Collection<Entity>): Position? {

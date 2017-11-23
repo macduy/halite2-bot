@@ -12,7 +12,11 @@ class Ship(owner: Int, id: Int, xPos: Double, yPos: Double,
     var objective: Objective? = null
 
     fun canDock(planet: Planet): Boolean {
-        return getDistanceTo(planet) <= Constants.SHIP_RADIUS + Constants.DOCK_RADIUS + planet.radius
+        return this.withinDistance(planet, Constants.DOCK_RADIUS)
+    }
+
+    fun withinDistance(planet: Planet, distance: Double): Boolean {
+        return getDistanceTo(planet) <= Constants.SHIP_RADIUS + distance + planet.radius
     }
 
     override fun toString(): String {

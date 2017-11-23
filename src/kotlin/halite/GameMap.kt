@@ -4,11 +4,16 @@ import java.util.ArrayList
 import java.util.TreeMap
 import java.util.Collections
 
+enum class EntitySelection {
+    ALL, PLANETS_AND_OWN_SHIPS
+}
+
 open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
     val players: MutableList<Player>
     val allPlayers: List<Player>
     val planets: MutableMap<Int, Planet>
-    val allShips: MutableList<Ship>
+    val allShips: MutableMap<Int, Ship>
+    val enemyShips: MutableList<Ship>
 
     // used only during parsing to reduce memory allocations
     private val currentShips = ArrayList<Ship>()
@@ -23,14 +28,24 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
         players = ArrayList(Constants.MAX_PLAYERS)
         allPlayers = Collections.unmodifiableList(players)
         planets = TreeMap()
-        allShips = mutableListOf()
+        allShips = TreeMap()
+        enemyShips = mutableListOf()
     }
 
-    fun objectsBetween(start: Position, target: Position): ArrayList<Entity> {
+    fun objectsBetween(start: Position, target: Position, selection: EntitySelection = EntitySelection.ALL): ArrayList<Entity> {
         val entitiesFound = ArrayList<Entity>()
 
-        addEntitiesBetween(entitiesFound, start, target, planets.values)
-        addEntitiesBetween(entitiesFound, start, target, allShips)
+        when (selection) {
+            EntitySelection.ALL -> {
+                addEntitiesBetween(entitiesFound, start, target, allPlanets.values)
+                addEntitiesBetween(entitiesFound, start, target, allShips.values)
+            }
+            EntitySelection.PLANETS_AND_OWN_SHIPS -> {
+                addEntitiesBetween(entitiesFound, start, target, allPlanets.values)
+                addEntitiesBetween(entitiesFound, start, target, myPlayer.ships.values)
+            }
+        }
+
 
         return entitiesFound
     }
@@ -49,7 +64,7 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
                 .filter { it != entity }
                 .forEach { entityByDistance.put(entity.getDistanceTo(it), it) }
 
-        allShips
+        allShips.values
                 .filter { it != entity }
                 .forEach { entityByDistance.put(entity.getDistanceTo(it), it) }
 
@@ -72,11 +87,15 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
 
             val currentPlayer = Player(playerId, currentPlayerShips)
             MetadataParser.populateShipList(currentShips, playerId, mapMetadata)
-            allShips.addAll(currentShips)
+            if (playerId != this.myPlayerId) {
+                enemyShips.addAll(currentShips)
+            }
 
             for (ship in currentShips) {
                 currentPlayerShips.put(ship.id, ship)
             }
+            allShips.putAll(currentPlayerShips)
+
             players.add(currentPlayer)
         }
 

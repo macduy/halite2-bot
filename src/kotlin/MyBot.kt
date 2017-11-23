@@ -11,6 +11,8 @@ fun main(args: Array<String>) {
         gameMap.updateMap(Networking.readLineIntoMetadata())
         commander.update()
 
+        commander.logObjectives(30)
+
         gameMap.myPlayer.ships.values
                 .filter { it.dockingStatus == DockingStatus.Undocked }
                 .forEach { ship ->
@@ -19,7 +21,7 @@ fun main(args: Array<String>) {
 
                     when(objective) {
                         is SettlePlanetObjective -> executor.navigateToPlanet(ship, objective.planet)
-                        is AttackPlanetObjective -> { }
+                        is AttackPlanetObjective -> executor.navigateToAttackPlanet(ship, objective.planet)
                         null -> { }
                     }
                 }
@@ -32,13 +34,31 @@ class Executor(private val gameMap: GameMap) {
 
     fun navigateToPlanet(ship: Ship, planet: Planet) {
         if (ship.canDock(planet)) {
-            moveList.add(DockMove(ship, planet))
+            this.addMove(DockMove(ship, planet))
         } else {
-            val newThrustMove = Navigation(ship, planet).navigateToDock(this.gameMap, Constants.MAX_SPEED / 2)
+            this.addMove(Navigation(ship, planet, gameMap).navigateToDock(Constants.MAX_SPEED / 2))
+        }
+    }
 
-            if (newThrustMove != null) {
-                moveList.add(newThrustMove)
+    fun navigateToAttackPlanet(ship: Ship, planet: Planet) {
+        val move: Move?
+        if (ship.withinDistance(planet, Constants.DOCK_RADIUS + 5.0)) {
+            // Pick an enemy on the planet
+            Log.log("${planet}")
+            val enemyShip = gameMap.allShips.get(planet.dockedShips.first())
+            if (enemyShip != null) {
+                Log.log("Targetting ${enemyShip.id} on ${planet.id}")
+                this.addMove(Navigation(ship, enemyShip, gameMap).navigateToEnemy())
             }
+        } else {
+            // Navigate to the planet
+            this.addMove(Navigation(ship, planet, gameMap).navigateToDock(Constants.MAX_SPEED / 2))
+        }
+    }
+
+    private fun addMove(move: Move?) {
+        if (move != null) {
+            moveList.add(move)
         }
     }
 
