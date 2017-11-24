@@ -8,10 +8,10 @@ class Executor(private val gameMap: GameMap) {
             this.addMove(DockMove(ship, planet))
         } else {
             // Attempt fast navigation if there are less ships around
-            if (gameMap.myPlayer.ships.size < 30) {
+            if (gameMap.myPlayer.ships.size < 50) {
                 this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1f), 5))
             } else {
-                this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(0.7f)))
+                this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(0.8f), 2))
             }
         }
     }
@@ -25,7 +25,7 @@ class Executor(private val gameMap: GameMap) {
             }
         } else {
             // Navigate to the planet for attack
-            this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(0.7f), 5))
+            this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1.0f), 5))
         }
     }
 
