@@ -6,13 +6,16 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
     fun navigateToPlanet(ship: Ship, planet: Planet) {
         if (ship.canDock(planet)) {
             if (!planet.isOwned || intel.isOwn(planet)) {
-                this.addMove(DockMove(ship, planet))
-            } else {
-                // Navigate to shoot nearest enemy
-                val enemyShip = gameMap.allShips[planet.dockedShips.first()]
+                val enemyShip = planet.nearbyEnemyShips.getOrNull(0)
                 if (enemyShip != null) {
-                    this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
+                    // Remove any enemies first
+                    this.maybeAttackEnemy(ship, enemyShip)
+                } else {
+                    this.addMove(DockMove(ship, planet))
                 }
+            } else {
+                // Planet belongs to enemy. Navigate to shoot nearest docked enemy
+                this.maybeAttackEnemy(ship, gameMap.allShips[planet.dockedShips.first()])
             }
         } else {
             // Attempt fast navigation if there are less ships around
@@ -23,13 +26,16 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
     fun navigateToAttackPlanet(ship: Ship, planet: Planet) {
         if (ship.withinDistance(planet, Constants.DOCK_RADIUS + 20.0)) {
             // Pick an enemy on the planet
-            val enemyShip = gameMap.allShips[planet.dockedShips.first()]
-            if (enemyShip != null) {
-                this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
-            }
+            this.maybeAttackEnemy(ship, gameMap.allShips[planet.dockedShips.first()])
         } else {
             // Navigate to the planet for attack
             this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1.0f)))
+        }
+    }
+
+    private fun maybeAttackEnemy(ship: Ship, enemyShip: Ship?) {
+        if (enemyShip != null) {
+            this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
         }
     }
 

@@ -4,7 +4,7 @@ import java.util.*
 class Commander(private val gameMap: GameMap): Intelligence {
     override val self: Player get() = gameMap.myPlayer
 
-    private val ownedPlanets = LinkedList<Planet>()
+    private val ownedPlanets = ArrayList<Planet>()
 
     override var freePlanets: Int = 0
     override var totalPlanets: Int = 0
@@ -114,6 +114,19 @@ class Commander(private val gameMap: GameMap): Intelligence {
 
         this.availableObjectives.clear()
         this.availableObjectives.addAll(this.objectives)
+
+        this.updateNearbyEnemyShips()
+    }
+
+    fun updateNearbyEnemyShips() {
+        for (enemyShip in this.gameMap.enemyShips) {
+            for (planet in this.ownedPlanets) {
+                if (enemyShip.withinDistance(planet, 12.0)) {
+                    planet.nearbyEnemyShips.add(enemyShip)
+                    Log.log("${enemyShip.id} detected near ${planet.id}")
+                }
+            }
+        }
     }
 
     fun updateObjectives() {

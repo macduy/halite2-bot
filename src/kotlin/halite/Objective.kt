@@ -110,7 +110,7 @@ class SettlePlanetObjective(planet: Planet): PlanetObjective(planet) {
     override fun isValid(intel: Intelligence): Boolean = true
 
     override fun computeScoreAndAllocation(intel: Intelligence): Pair<Double, Int> {
-        if (this.planet.isFull) return Pair(0.0, 0)
+        if (intel.isOwn(planet) && planet.isFull && planet.nearbyEnemyShips.size == 0) return Pair(0.0, 0)
 
         // Higher threshold means less early boosting
         val freePlanetsThreshold = if (intel.players < 3) 0.6 else 0.8
@@ -127,7 +127,7 @@ class SettlePlanetObjective(planet: Planet): PlanetObjective(planet) {
             else -> Pair(100.0, planet.dockingSpots)
         }
 
-        return Pair(settleBoost + distanceScore + unsettledScore.first, unsettledScore.second)
+        return Pair(settleBoost + distanceScore + unsettledScore.first, unsettledScore.second + planet.nearbyEnemyShips.size)
     }
 
     override fun toString() = "Settle(${this.planet.id}) ${super.toString()}"

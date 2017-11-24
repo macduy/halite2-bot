@@ -25,6 +25,8 @@ class Planet(owner: Int, id: Int, xPos: Double, yPos: Double, health: Int,
     val freeRatio: Double
         get() = 1.0 - dockedRatio
 
+    val nearbyEnemyShips = ArrayList<Ship>()
+
     override fun registerAngleOfApproach(angle: Double): Double {
         val newAngle = getAngleOfApproach(angle)
         Log.log("Approach at $newAngle")
@@ -36,7 +38,6 @@ class Planet(owner: Int, id: Int, xPos: Double, yPos: Double, health: Int,
         if (isAngleSafe(initial)) return initial
 
         for (i in 1..CORRECTIONS) {
-            Log.log("Correction.")
             val positive = initial + i * CORRECTION_STEP
             if (isAngleSafe(positive)) return positive
 
