@@ -62,8 +62,8 @@ class Planet(owner: Int, id: Int, xPos: Double, yPos: Double, health: Int,
     }
 
     companion object {
-        val MIN_ANGULAR_DISTANCE = 0.174533
-        val CORRECTION_STEP = 0.2
-        val CORRECTIONS = 3
+        val MIN_ANGULAR_DISTANCE = 0.274533
+        val CORRECTION_STEP = 0.1
+        val CORRECTIONS = 10
     }
 }

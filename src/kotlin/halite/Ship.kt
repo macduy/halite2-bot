@@ -19,6 +19,14 @@ class Ship(owner: Int, id: Int, xPos: Double, yPos: Double,
         return getDistanceTo(planet) <= Constants.SHIP_RADIUS + distance + planet.radius
     }
 
+    fun futureShip(move: ThrustMove): List<FutureShip> {
+        return (1..move.thrust).map {
+            val dx = Math.cos(Math.toRadians(move.angle.toDouble())) * it
+            val dy = Math.sin(Math.toRadians(move.angle.toDouble())) * it
+            FutureShip(owner, xPos + dx, yPos + dy)
+        }
+    }
+
     override fun toString(): String {
         return "Ship[" +
                 super.toString() +

@@ -14,6 +14,7 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
     val planets: MutableMap<Int, Planet>
     val allShips: MutableMap<Int, Ship>
     val enemyShips: MutableList<Ship>
+    val futureShips: MutableList<FutureShip>
 
     // used only during parsing to reduce memory allocations
     private val currentShips = ArrayList<Ship>()
@@ -30,6 +31,7 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
         planets = TreeMap()
         allShips = TreeMap()
         enemyShips = mutableListOf()
+        futureShips = mutableListOf()
     }
 
     fun objectsBetween(start: Position, target: Position, selection: EntitySelection = EntitySelection.ALL): ArrayList<Entity> {
@@ -39,10 +41,12 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
             EntitySelection.ALL -> {
                 addEntitiesBetween(entitiesFound, start, target, allPlanets.values)
                 addEntitiesBetween(entitiesFound, start, target, allShips.values)
+                addEntitiesBetween(entitiesFound, start, target, futureShips)
             }
             EntitySelection.PLANETS_AND_OWN_SHIPS -> {
                 addEntitiesBetween(entitiesFound, start, target, allPlanets.values)
                 addEntitiesBetween(entitiesFound, start, target, myPlayer.ships.values)
+                addEntitiesBetween(entitiesFound, start, target, futureShips)
             }
         }
 
@@ -77,6 +81,8 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
         players.clear()
         planets.clear()
         allShips.clear()
+        enemyShips.clear()
+        futureShips.clear()
 
         // update players info
         (0 until numberOfPlayers).forEach {

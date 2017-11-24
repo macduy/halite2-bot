@@ -16,29 +16,27 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
             }
         } else {
             // Attempt fast navigation if there are less ships around
-            if (gameMap.myPlayer.ships.size < 50) {
-                this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1f), 4))
-            } else {
-                this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(0.8f), 2))
-            }
+            this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1f)))
         }
     }
 
     fun navigateToAttackPlanet(ship: Ship, planet: Planet) {
-        if (ship.withinDistance(planet, Constants.DOCK_RADIUS + 10.0)) {
+        if (ship.withinDistance(planet, Constants.DOCK_RADIUS + 20.0)) {
             // Pick an enemy on the planet
             val enemyShip = gameMap.allShips[planet.dockedShips.first()]
             if (enemyShip != null) {
-                this.addMove(Navigation(ship, enemyShip, gameMap).kamikazeEnemy())
-//                this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
+                this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
             }
         } else {
             // Navigate to the planet for attack
-            this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1.0f), 5))
+            this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1.0f)))
         }
     }
 
     private fun addMove(move: Move?) {
+        if (move is ThrustMove) {
+            gameMap.futureShips.addAll(move.ship.futureShip(move))
+        }
         if (move != null) {
             moveList.add(move)
         }

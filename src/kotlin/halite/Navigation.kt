@@ -1,10 +1,14 @@
 package halite
 
+import java.util.*
+
 class Navigation(private val ship: Ship, private val target: Entity, private val gameMap: GameMap) {
+
+    val random = Random()
 
     fun navigateToDock(maxThrust: Int, angularStepMultiplier: Int = 1): ThrustMove? {
         val maxCorrections = Constants.MAX_NAVIGATION_CORRECTIONS / angularStepMultiplier
-        val angularStepRad = Math.PI / 180.0 * angularStepMultiplier
+        val angularStepRad = Math.PI / 180.0 * angularStepMultiplier * scale()
         val targetPos = ship.getClosestPoint(target)
 
         return navigateTowards(targetPos, maxThrust, EntitySelection.ALL, maxCorrections, angularStepRad)
@@ -12,13 +16,13 @@ class Navigation(private val ship: Ship, private val target: Entity, private val
 
     fun navigateToShootEnemy(): ThrustMove? {
         val maxCorrections = Constants.MAX_NAVIGATION_CORRECTIONS
-        val angularStepRad = Math.PI / 180.0
-        return navigateTowards(ship.getClosestPoint(target, 2), Constants.MAX_SPEED, EntitySelection.ALL, maxCorrections, angularStepRad)
+        val angularStepRad = Math.PI / 180.0 * scale()
+        return navigateTowards(ship.getClosestPoint(target, 1), Constants.MAX_SPEED, EntitySelection.ALL, maxCorrections, angularStepRad)
     }
 
     fun kamikazeEnemy(): ThrustMove? {
         val maxCorrections = Constants.MAX_NAVIGATION_CORRECTIONS
-        val angularStepRad = Math.PI / 180.0
+        val angularStepRad = Math.PI / 180.0 * scale()
 
         return navigateTowards(target, Constants.MAX_SPEED, EntitySelection.PLANETS_AND_OWN_SHIPS, maxCorrections, angularStepRad)
     }
@@ -44,15 +48,14 @@ class Navigation(private val ship: Ship, private val target: Entity, private val
         }
 
         val thrust: Int
-        thrust = if (distance < maxThrust) {
-            // Do not round up, since overshooting might cause collision.
-            distance.toInt()
-        } else {
-            maxThrust
-        }
+
+        // Do not round up, since overshooting might cause collision.
+        thrust = if (distance < maxThrust) distance.toInt() else maxThrust
 
         val angleDeg = Util.angleRadToDegClipped(angleRad)
 
         return ThrustMove(ship, angleDeg, thrust)
     }
+
+    private fun scale() = 1.0
 }
