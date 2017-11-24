@@ -19,8 +19,8 @@ open class Position(val xPos: Double, val yPos: Double) {
         return Math.atan2(dy, dx) + 2 * Math.PI
     }
 
-    fun getClosestPoint(target: Entity): Position {
-        val radius = target.radius + Constants.MIN_DISTANCE
+    fun getClosestPoint(target: Entity, distance: Int = Constants.MIN_DISTANCE): Position {
+        val radius = target.radius + distance
         val initialAngleRad = target.orientTowardsInRad(this)
         val angleRad = target.registerAngleOfApproach(initialAngleRad)
 

@@ -21,7 +21,8 @@ class Executor(private val gameMap: GameMap) {
             // Pick an enemy on the planet
             val enemyShip = gameMap.allShips.get(planet.dockedShips.first())
             if (enemyShip != null) {
-                this.addMove(Navigation(ship, enemyShip, gameMap).navigateToEnemy())
+//                this.addMove(Navigation(ship, enemyShip, gameMap).kamikazeEnemy())
+                this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
             }
         } else {
             // Navigate to the planet for attack
