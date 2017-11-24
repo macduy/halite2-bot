@@ -40,6 +40,12 @@ task submission(type: Zip) {
     archiveName 'submission.zip'
 }
 
+task submit(type: Exec) {
+    commandLine './hlt_client/hlt_client/client.py', 'bot', '-b', 'build/distributions/submission.zip'
+}
+
+submit.dependsOn submission
+
 submission.dependsOn jar
 group 'aaa'
 version '1.0-SNAPSHOT'
