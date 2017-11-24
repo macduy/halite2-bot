@@ -7,63 +7,30 @@ fun main(args: Array<String>) {
     val commander by lazy { Commander(gameMap) }
     val executor = Executor(gameMap)
 
+    var turn = 0
+
     while (true) {
+        Log.log("--- TURN $turn ---")
         gameMap.updateMap(Networking.readLineIntoMetadata())
         commander.update()
 
-        commander.logObjectives(30)
+        for (ship in gameMap.myPlayer.ships.values) {
+            if (ship.dockingStatus != DockingStatus.Undocked) continue
 
-        gameMap.myPlayer.ships.values
-                .filter { it.dockingStatus == DockingStatus.Undocked }
-                .forEach { ship ->
+            commander.assignBestObjective(ship)
 
-                    val objective = ship.objective ?: commander.assignObjective(ship)
+            val objective = ship.objective
 
-                    when(objective) {
-                        is SettlePlanetObjective -> executor.navigateToPlanet(ship, objective.planet)
-                        is AttackPlanetObjective -> executor.navigateToAttackPlanet(ship, objective.planet)
-                        null -> { }
-                    }
-                }
-        executor.execute()
-    }
-}
-
-class Executor(private val gameMap: GameMap) {
-    private val moveList = mutableListOf<Move>()
-
-    fun navigateToPlanet(ship: Ship, planet: Planet) {
-        if (ship.canDock(planet)) {
-            this.addMove(DockMove(ship, planet))
-        } else {
-            this.addMove(Navigation(ship, planet, gameMap).navigateToDock(Constants.MAX_SPEED / 2))
-        }
-    }
-
-    fun navigateToAttackPlanet(ship: Ship, planet: Planet) {
-        val move: Move?
-        if (ship.withinDistance(planet, Constants.DOCK_RADIUS + 5.0)) {
-            // Pick an enemy on the planet
-            Log.log("${planet}")
-            val enemyShip = gameMap.allShips.get(planet.dockedShips.first())
-            if (enemyShip != null) {
-                Log.log("Targetting ${enemyShip.id} on ${planet.id}")
-                this.addMove(Navigation(ship, enemyShip, gameMap).navigateToEnemy())
+            when (objective) {
+                is SettlePlanetObjective -> executor.navigateToPlanet(ship, objective.planet)
+                is AttackPlanetObjective -> executor.navigateToAttackPlanet(ship, objective.planet)
+                null -> { }
             }
-        } else {
-            // Navigate to the planet
-            this.addMove(Navigation(ship, planet, gameMap).navigateToDock(Constants.MAX_SPEED / 2))
         }
-    }
 
-    private fun addMove(move: Move?) {
-        if (move != null) {
-            moveList.add(move)
-        }
-    }
+        executor.execute()
+        commander.logObjectives(10)
 
-    fun execute() {
-        Networking.sendMoves(this.moveList)
-        this.moveList.clear()
+        turn += 1
     }
 }

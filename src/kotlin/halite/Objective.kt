@@ -1,12 +1,17 @@
 package halite
 
+import com.sun.org.apache.xml.internal.utils.IntVector
 import ratioOf
 import java.util.*
 
 interface Intelligence {
+    val self: Player
     var kingdomCenter: Position
     var freePlanets: Int
     var totalPlanets: Int
+    var enemyPlanets: Int
+    var unownedPlanets: Int
+    var players: Int
 
     fun getPlanet(id: Int): Planet?
 
@@ -29,12 +34,16 @@ sealed class Objective {
         private set
 
     fun update(intel: Intelligence) {
-        // Check existing ships
-        this.assignedShips.retainAll { intel.shipExists(it) }
+        if (RESET_ASSIGNMENTS) {
+            this.assignedShips.clear()
+        } else {
+            // Check existing ships
+            this.assignedShips.retainAll { intel.shipExists(it) }
 
-        // Set objective on each ship
-        for (shipId in this.assignedShips) {
-            intel.getShip(shipId)?.objective = this
+            // Set objective on each ship
+            for (shipId in this.assignedShips) {
+                intel.getShip(shipId)?.objective = this
+            }
         }
 
         this.valid = this.onPreUpdate(intel) && this.isValid(intel)
@@ -73,6 +82,12 @@ sealed class Objective {
     abstract fun isValid(intel: Intelligence): Boolean
 
     abstract fun computeScoreAndAllocation(intel: Intelligence): Pair<Double, Int>
+
+    abstract fun distancePenalty(ship: Ship): Double
+
+    companion object {
+        val RESET_ASSIGNMENTS = true
+    }
 }
 
 abstract class PlanetObjective(var planet: Planet): Objective() {
@@ -84,6 +99,11 @@ abstract class PlanetObjective(var planet: Planet): Objective() {
 
         return true
     }
+
+    override fun distancePenalty(ship: Ship): Double {
+        val distance = this.planet.getDistanceTo(ship)
+        return distance * 2
+    }
 }
 
 class SettlePlanetObjective(planet: Planet): PlanetObjective(planet) {
@@ -92,14 +112,17 @@ class SettlePlanetObjective(planet: Planet): PlanetObjective(planet) {
     override fun computeScoreAndAllocation(intel: Intelligence): Pair<Double, Int> {
         if (this.planet.isFull) return Pair(0.0, 0)
 
-        val settleBoost = if (intel.freePlanets.ratioOf(intel.totalPlanets) < 0.4) 400.0 else 0.0
+        // Higher threshold means less early boosting
+        val freePlanetsThreshold = if (intel.players < 3) 0.4 else 0.6
+
+        val settleBoost = if (intel.freePlanets.ratioOf(intel.totalPlanets) > freePlanetsThreshold) 400.0 else 0.0
         val distanceScore = Math.min(100.0, 1000.0 / intel.kingdomCenter.getDistanceTo(this.planet))
         val unsettledScore: Pair<Double, Int> = when {
-            planet.isOwned && intel.isOwn(planet) ->  {
-                val freeSpots = planet.dockingSpots - planet.dockedShips.count()
-                Pair(freeSpots.toDouble() / planet.dockingSpots * 150.0, planet.dockingSpots)
-            }
+            // We own this planet, continue docking more
+            planet.isOwned && intel.isOwn(planet) -> Pair(planet.freeRatio * 150.0, planet.freeSpots)
+            // Planet is free for grabs
             !planet.isOwned -> Pair(100.0, planet.dockingSpots)
+
             else -> Pair(0.0, 0)
         }
 
@@ -124,9 +147,19 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
         val enemyShips = planet.dockedShips.count()
         val occupyScore = if (enemyShips > 0) (5 - planet.dockedShips.count()) * 10.0 else 0.0
 
-        val multiplier = if (aggressive) 5 else 2
+        val assignment: Int = when {
+            intel.self.ships.count() < 2 * (intel.unownedPlanets * 4) -> {
+                val multiplier = if (aggressive) 5 else 2
+                planet.dockedShips.count() * multiplier
+            }
 
-        return Pair(attackBoost + distanceScore + occupyScore, planet.dockedShips.count() * multiplier)
+            // When we have lots of ships
+            else -> {
+                intel.self.ships.count() / intel.enemyPlanets
+            }
+        }
+
+        return Pair(attackBoost + distanceScore + occupyScore, assignment)
     }
 
     override fun toString() = "Attack ${this.planet.id}, has ${this.planet.dockedShips.count()} ships ${super.toString()}"
