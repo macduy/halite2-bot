@@ -26,7 +26,7 @@ class Commander(private val gameMap: GameMap): Intelligence {
 
     override fun getShip(id: Int) = this.self.ships[id]
 
-    override fun isOwn(planet: Planet) = planet.owner == this.self.id
+    override fun isOwn(planet: Planet) = planet.isOwned && planet.owner == this.self.id
 
     init {
         // Set up objectives for each planet

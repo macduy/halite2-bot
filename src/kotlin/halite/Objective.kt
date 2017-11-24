@@ -113,17 +113,17 @@ class SettlePlanetObjective(planet: Planet): PlanetObjective(planet) {
         if (this.planet.isFull) return Pair(0.0, 0)
 
         // Higher threshold means less early boosting
-        val freePlanetsThreshold = if (intel.players < 3) 0.4 else 0.6
+        val freePlanetsThreshold = if (intel.players < 3) 0.6 else 0.8
 
         val settleBoost = if (intel.freePlanets.ratioOf(intel.totalPlanets) > freePlanetsThreshold) 400.0 else 0.0
-        val distanceScore = Math.min(100.0, 1000.0 / intel.kingdomCenter.getDistanceTo(this.planet))
+        val distanceScore = Math.min(100.0, 3000.0 / intel.kingdomCenter.getDistanceTo(this.planet))
         val unsettledScore: Pair<Double, Int> = when {
             // We own this planet, continue docking more
             planet.isOwned && intel.isOwn(planet) -> Pair(planet.freeRatio * 150.0, planet.freeSpots)
             // Planet is free for grabs
             !planet.isOwned -> Pair(100.0, planet.dockingSpots)
 
-            else -> Pair(0.0, 0)
+            else -> Pair(0.0, 2)
         }
 
         return Pair(settleBoost + distanceScore + unsettledScore.first, unsettledScore.second)
@@ -143,7 +143,7 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
 
         val aggressive = (intel.freePlanets == 0)
         val attackBoost = if (aggressive) 500.0 else 0.0
-        val distanceScore = Math.min(50.0, 500.0 / intel.kingdomCenter.getDistanceTo(this.planet))
+        val distanceScore = Math.min(50.0, 1500.0 / intel.kingdomCenter.getDistanceTo(this.planet))
         val enemyShips = planet.dockedShips.count()
         val occupyScore = if (enemyShips > 0) (5 - planet.dockedShips.count()) * 10.0 else 0.0
 

@@ -3,9 +3,9 @@ import halite.*
 
 fun main(args: Array<String>) {
     val networking = Networking()
-    val gameMap = networking.initialize("BrokenSword2")
+    val gameMap = networking.initialize("BrokenSword4")
     val commander by lazy { Commander(gameMap) }
-    val executor = Executor(gameMap)
+    val executor = Executor(gameMap, commander)
 
     var turn = 0
 

@@ -13,7 +13,7 @@ class Navigation(private val ship: Ship, private val target: Entity, private val
     fun navigateToShootEnemy(): ThrustMove? {
         val maxCorrections = Constants.MAX_NAVIGATION_CORRECTIONS
         val angularStepRad = Math.PI / 180.0
-        return navigateTowards(ship.getClosestPoint(target, -1), Constants.MAX_SPEED, EntitySelection.ALL, maxCorrections, angularStepRad)
+        return navigateTowards(ship.getClosestPoint(target, 2), Constants.MAX_SPEED, EntitySelection.ALL, maxCorrections, angularStepRad)
     }
 
     fun kamikazeEnemy(): ThrustMove? {

@@ -1,15 +1,23 @@
 import halite.*
 
-class Executor(private val gameMap: GameMap) {
+class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
     private val moveList = mutableListOf<Move>()
 
     fun navigateToPlanet(ship: Ship, planet: Planet) {
         if (ship.canDock(planet)) {
-            this.addMove(DockMove(ship, planet))
+            if (!planet.isOwned || intel.isOwn(planet)) {
+                this.addMove(DockMove(ship, planet))
+            } else {
+                // Navigate to shoot nearest enemy
+                val enemyShip = gameMap.allShips[planet.dockedShips.first()]
+                if (enemyShip != null) {
+                    this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
+                }
+            }
         } else {
             // Attempt fast navigation if there are less ships around
             if (gameMap.myPlayer.ships.size < 50) {
-                this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1f), 5))
+                this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1f), 4))
             } else {
                 this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(0.8f), 2))
             }
@@ -19,10 +27,10 @@ class Executor(private val gameMap: GameMap) {
     fun navigateToAttackPlanet(ship: Ship, planet: Planet) {
         if (ship.withinDistance(planet, Constants.DOCK_RADIUS + 10.0)) {
             // Pick an enemy on the planet
-            val enemyShip = gameMap.allShips.get(planet.dockedShips.first())
+            val enemyShip = gameMap.allShips[planet.dockedShips.first()]
             if (enemyShip != null) {
-//                this.addMove(Navigation(ship, enemyShip, gameMap).kamikazeEnemy())
-                this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
+                this.addMove(Navigation(ship, enemyShip, gameMap).kamikazeEnemy())
+//                this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
             }
         } else {
             // Navigate to the planet for attack
