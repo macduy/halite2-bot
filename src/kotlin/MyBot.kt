@@ -3,7 +3,7 @@ import halite.*
 
 fun main(args: Array<String>) {
     val networking = Networking()
-    val gameMap = networking.initialize("BrokenSword4")
+    val gameMap = networking.initialize("BrokenSword5")
     val commander by lazy { Commander(gameMap) }
     val executor = Executor(gameMap, commander)
 
@@ -19,13 +19,7 @@ fun main(args: Array<String>) {
 
             commander.assignBestObjective(ship)
 
-            val objective = ship.objective
-
-            when (objective) {
-                is SettlePlanetObjective -> executor.navigateToPlanet(ship, objective.planet)
-                is AttackPlanetObjective -> executor.navigateToAttackPlanet(ship, objective.planet)
-                null -> { }
-            }
+            executor.direct(ship)
         }
 
         executor.execute()

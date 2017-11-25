@@ -15,6 +15,7 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
     val allShips: MutableMap<Int, Ship>
     val enemyShips: MutableList<Ship>
     val futureShips: MutableList<FutureShip>
+    var turn = 0
 
     // used only during parsing to reduce memory allocations
     private val currentShips = ArrayList<Ship>()
@@ -115,6 +116,8 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
         if (!mapMetadata.isEmpty) {
             throw IllegalStateException("Failed to parse data from Halite game engine. Please contact maintainers.")
         }
+
+        turn += 1
 
         return this
     }

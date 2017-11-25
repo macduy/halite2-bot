@@ -29,7 +29,6 @@ class Planet(owner: Int, id: Int, xPos: Double, yPos: Double, health: Int,
 
     override fun registerAngleOfApproach(angle: Double): Double {
         val newAngle = getAngleOfApproach(angle)
-        Log.log("Approach at $newAngle")
         intendedDockingAngles.add(newAngle)
         return newAngle
     }

@@ -4,17 +4,20 @@ import java.util.*
 class Commander(private val gameMap: GameMap): Intelligence {
     override val self: Player get() = gameMap.myPlayer
 
-    private val ownedPlanets = ArrayList<Planet>()
+    private var ownedPlanets = ArrayList<Planet>()
 
     override var freePlanets: Int = 0
     override var totalPlanets: Int = 0
     override var enemyPlanets: Int = 0
     override var unownedPlanets: Int = 0
-    override var players: Int = 0
+
+    override val players: Int get() = this.gameMap.players.size
+    override val turn: Int get() = gameMap.turn
+    override val enemyShips: List<Ship> get() = gameMap.enemyShips
 
     override var kingdomCenter = Position(0.0, 0.0)
 
-    var objectives = LinkedList<Objective>()
+    private val objectives = LinkedList<Objective>()
 
     var availableObjectives = LinkedList<Objective>()
 
@@ -30,6 +33,7 @@ class Commander(private val gameMap: GameMap): Intelligence {
 
     init {
         // Set up objectives for each planet
+        this.objectives.add(EarlyAttackObjective())
         for (planet in this.gameMap.planets.values) {
             this.objectives.add(SettlePlanetObjective(planet))
             this.objectives.add(AttackPlanetObjective(planet))
@@ -61,8 +65,6 @@ class Commander(private val gameMap: GameMap): Intelligence {
         var bestScore = Double.NEGATIVE_INFINITY
 
         for (objective in this.availableObjectives) {
-            if (objective.score <= 0) continue
-
             val score = objective.score - objective.distancePenalty(ship)
 //            Log.log("${objective.score} - ${objective.distancePenalty(ship)}")
             if (score > bestScore) {
@@ -110,10 +112,8 @@ class Commander(private val gameMap: GameMap): Intelligence {
 
         this.updateObjectives()
 
-        this.players = this.gameMap.players.size
-
         this.availableObjectives.clear()
-        this.availableObjectives.addAll(this.objectives)
+        this.objectives.filterTo(this.availableObjectives) { it.valid && it.score > 0 }
 
         this.updateNearbyEnemyShips()
     }
@@ -135,23 +135,20 @@ class Commander(private val gameMap: GameMap): Intelligence {
             objective.update(this)
         }
 
-        // Remove any invalid objectives
-        this.objectives.retainAll { it.valid }
-
         // Sort by score
         this.objectives.sortByDescending { it.score }
     }
 
     private fun computeKingdomCenter() {
         // If there at least 3 planets, use them.
-        val planetCenter = if (this.ownedPlanets.size >= 3) this.getCenter(this.ownedPlanets) else null
+        val planetCenter = if (this.ownedPlanets.size >= 3) this.ownedPlanets.center() else null
         if (planetCenter != null) {
             this.kingdomCenter = planetCenter
             return
         }
 
         // Otherwise use ships
-        var shipCenter = this.getCenter(this.self.ships.values)
+        var shipCenter = this.self.ships.values.center()
         if (shipCenter != null) {
             this.kingdomCenter = shipCenter
             return
@@ -170,19 +167,6 @@ class Commander(private val gameMap: GameMap): Intelligence {
         this.freePlanets = this.gameMap.planets.values.count { !it.isOwned }
         this.enemyPlanets = this.totalPlanets - this.freePlanets - this.ownedPlanets.size
         this.unownedPlanets = this.totalPlanets - this.ownedPlanets.size
-    }
-
-    private fun getCenter(entities: Collection<Entity>): Position? {
-        if (entities.isEmpty()) return null
-
-        var x = 0.0
-        var y = 0.0
-        for (entity in entities) {
-            x += entity.xPos
-            y += entity.yPos
-        }
-
-        return Position(x / entities.count(), y / entities.count())
     }
 
     public fun logObjectives(count: Int = 5) {

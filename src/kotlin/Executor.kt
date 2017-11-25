@@ -3,6 +3,17 @@ import halite.*
 class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
     private val moveList = mutableListOf<Move>()
 
+    fun direct(ship: Ship) {
+        val objective = ship.objective
+
+        when (objective) {
+            is SettlePlanetObjective -> this.navigateToPlanet(ship, objective.planet)
+            is AttackPlanetObjective -> this.navigateToAttackPlanet(ship, objective.planet)
+            is EarlyAttackObjective -> this.earlyAttackShips(ship)
+            null -> { }
+        }
+    }
+
     fun navigateToPlanet(ship: Ship, planet: Planet) {
         if (ship.canDock(planet)) {
             if (!planet.isOwned || intel.isOwn(planet)) {
@@ -26,11 +37,17 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
     fun navigateToAttackPlanet(ship: Ship, planet: Planet) {
         if (ship.withinDistance(planet, Constants.DOCK_RADIUS + 20.0)) {
             // Pick an enemy on the planet
-            this.maybeAttackEnemy(ship, gameMap.allShips[planet.dockedShips.first()])
+            if (!planet.dockedShips.isEmpty()) {
+                this.maybeAttackEnemy(ship, gameMap.allShips[planet.dockedShips.first()])
+            }
         } else {
             // Navigate to the planet for attack
             this.addMove(Navigation(ship, planet, gameMap).navigateToDock(speed(1.0f)))
         }
+    }
+
+    fun earlyAttackShips(ship: Ship) {
+        this.maybeAttackEnemy(ship, gameMap.enemyShips.getOrNull(0))
     }
 
     private fun maybeAttackEnemy(ship: Ship, enemyShip: Ship?) {

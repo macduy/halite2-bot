@@ -32,6 +32,15 @@ class Navigation(private val ship: Ship, private val target: Entity, private val
                         obstacleDetection: EntitySelection,
                         maxCorrections: Int,
                         angularStepRad: Double): ThrustMove? {
+        return navigateTowardsInternal(targetPos, maxThrust, obstacleDetection, maxCorrections, angularStepRad)
+                ?: this.navigateTowardsInternal(targetPos, maxThrust, obstacleDetection, maxCorrections, -angularStepRad)
+    }
+
+    private fun navigateTowardsInternal(targetPos: Position,
+            maxThrust: Int,
+            obstacleDetection: EntitySelection,
+            maxCorrections: Int,
+            angularStepRad: Double): ThrustMove? {
         if (maxCorrections <= 0) {
             return null
         }
@@ -44,7 +53,7 @@ class Navigation(private val ship: Ship, private val target: Entity, private val
             val newTargetDy = Math.sin(angleRad + angularStepRad) * distance
             val newTarget = Position(ship.xPos + newTargetDx, ship.yPos + newTargetDy)
 
-            return navigateTowards(newTarget, maxThrust, obstacleDetection, maxCorrections - 1, angularStepRad)
+            return navigateTowardsInternal(newTarget, maxThrust, obstacleDetection, maxCorrections - 1, angularStepRad)
         }
 
         val thrust: Int
