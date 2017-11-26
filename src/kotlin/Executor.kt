@@ -9,7 +9,7 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
         when (objective) {
             is SettlePlanetObjective -> this.navigateToPlanet(ship, objective.planet)
             is AttackPlanetObjective -> this.navigateToAttackPlanet(ship, objective.planet)
-            is EarlyAttackObjective -> this.earlyAttackShips(ship)
+            is EarlyAttackObjective -> this.earlyAttackShips(ship, objective.target)
             null -> { }
         }
     }
@@ -46,8 +46,8 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
         }
     }
 
-    fun earlyAttackShips(ship: Ship) {
-        this.maybeAttackEnemy(ship, gameMap.enemyShips.getOrNull(0))
+    private fun earlyAttackShips(ship: Ship, target: Ship?) {
+        this.maybeAttackEnemy(ship, target)
     }
 
     private fun maybeAttackEnemy(ship: Ship, enemyShip: Ship?) {

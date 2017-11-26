@@ -1,5 +1,7 @@
 import halite.Entity
+import halite.Planet
 import halite.Position
+import halite.Ship
 
 fun Double.clamp(from: Double, to: Double): Double =
     when {
@@ -25,4 +27,20 @@ fun Collection<Entity>.center(): Position? {
     }
 
     return Position(x / this.count(), y / this.count())
+}
+
+fun <E: Entity> Collection<E>.nearestTo(other: Position): E? {
+    if (this.isEmpty()) return null
+
+    var nearest: E? = null
+    var minDist = Double.MAX_VALUE
+    for (entity in this) {
+        val dist = entity.getDistanceTo(other)
+        if (dist < minDist) {
+            minDist = dist
+            nearest = entity
+        }
+    }
+
+    return nearest
 }

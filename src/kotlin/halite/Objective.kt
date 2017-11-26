@@ -2,6 +2,7 @@ package halite
 
 import center
 import com.sun.org.apache.xml.internal.utils.IntVector
+import nearestTo
 import ratioOf
 import java.util.*
 
@@ -97,7 +98,7 @@ abstract class PlanetObjective(var planet: Planet): Objective() {
 class SettlePlanetObjective(planet: Planet): PlanetObjective(planet) {
 
     override fun computeScoreAndAllocation(intel: Intelligence): Pair<Double, Int> {
-        val nearbyEnemyShips = planet.nearbyEnemyShips.size
+        val nearbyEnemyShips = this.planet.nearbyEnemyShips.size
         if (intel.isOwn(planet) && planet.isFull && nearbyEnemyShips == 0) return Pair(0.0, 0)
 
         // Higher threshold means less early boosting
@@ -108,7 +109,7 @@ class SettlePlanetObjective(planet: Planet): PlanetObjective(planet) {
         val unsettledScore: Pair<Double, Int> = when {
             planet.isOwned -> when {
                 intel.isOwn(planet) ->
-                    Pair(planet.freeRatio * 200.0 + Math.sqrt(nearbyEnemyShips.toDouble()) * 100.0, planet.freeSpots + nearbyEnemyShips)
+                    Pair(planet.freeRatio * 150.0 + Math.sqrt(nearbyEnemyShips.toDouble()) * 200.0, planet.freeSpots + nearbyEnemyShips)
                 else -> Pair(80.0, planet.dockingSpots)
             }
 
@@ -116,7 +117,7 @@ class SettlePlanetObjective(planet: Planet): PlanetObjective(planet) {
             else -> Pair(100.0, planet.dockingSpots)
         }
 
-        return Pair(settleBoost + distanceScore + unsettledScore.first, unsettledScore.second)
+        return Pair(settleBoost + distanceScore + unsettledScore.first, unsettledScore.second + nearbyEnemyShips)
     }
 
     override fun toString() = "Settle(${this.planet.id}) ${super.toString()}"
@@ -154,25 +155,29 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
 }
 
 class EarlyAttackObjective: Objective() {
+    var target: Ship? = null
+
     override fun onPreUpdate(intel: Intelligence): Boolean {
         // Only attempt this if we have exactly 3 ships
         if (intel.self.ships.size != 3) return false
 
         // Similarly, only attempt this in 2 player games
-        if (intel.players != 2) return false
+//        if (intel.players != 2) return false
 
         // If there are too many enemies, bail out
-        if (intel.enemyShips.size > 8 ) return false
+        if (intel.enemyShips.size > EARLY_ATTACK_ENEMY_LIMIT[intel.players]) return false
 
         // Bail if we are too far away. Maximum distance depends on how many turns we got left to execute it.
-        val enemyCenter = intel.enemyShips.center() ?: return false
+//        val target = intel.enemyShips.center() ?: return false
+        val target = intel.enemyShips.nearestTo(intel.kingdomCenter) ?: return false
+        Log.log("Nearest $target from ${intel.enemyShips.size}")
 
-
-        val maxDistance = Math.max(15.0, ((EARLY_ATTACK_MAX_TURN - intel.turn) * AVERAGE_SPEED).toDouble())
-        Log.log("EA: ${enemyCenter.getDistanceTo(intel.kingdomCenter)} > $maxDistance")
-        if (enemyCenter.getDistanceTo(intel.kingdomCenter) > maxDistance) return false
+        val maxDistance = Math.max(15.0, ((EARLY_ATTACK_MAX_TURN[intel.players] - intel.turn) * AVERAGE_SPEED).toDouble())
+        Log.log("EA: ${target.getDistanceTo(intel.kingdomCenter)} > $maxDistance")
+        if (target.getDistanceTo(intel.kingdomCenter) > maxDistance) return false
 
         // Otherwise go for it!
+        this.target = target
         return true
     }
 
@@ -185,8 +190,13 @@ class EarlyAttackObjective: Objective() {
     override fun toString() = "EarlyAttack ${super.toString()}"
 
     companion object {
-        val EARLY_ATTACK_MAX_TURN = 25
+        val EARLY_ATTACK_MAX_TURN = configFor(30, 20, 20)
+        val EARLY_ATTACK_ENEMY_LIMIT = configFor(8, 10, 12)
 
         val AVERAGE_SPEED = 5
+
+        fun configFor(two: Int, three: Int, four: Int): Array<Int> {
+            return arrayOf(0, 0, two, three, four)
+        }
     }
 }

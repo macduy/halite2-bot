@@ -83,27 +83,6 @@ class Commander(private val gameMap: GameMap): Intelligence {
         }
     }
 
-    fun getPlanetToExplore(ship: Ship): Planet? {
-        var nearest: Planet? = null
-        var minDist = Double.MAX_VALUE
-        for (planet in this.gameMap.allPlanets.values) {
-            if (planet.isOwned) {
-                if (planet.owner != this.self.id) {
-                    continue
-                } else if (planet.isFull) {
-                    continue
-                }
-            }
-
-            val dist = planet.getDistanceTo(ship)
-            if (dist < minDist) {
-                minDist = dist
-                nearest = planet
-            }
-        }
-        return nearest
-    }
-
     fun update() {
         // Find own planets
         this.updateOwnedPlanets()
