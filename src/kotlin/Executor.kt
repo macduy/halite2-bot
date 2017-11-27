@@ -14,7 +14,13 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
         }
     }
 
-    fun navigateToPlanet(ship: Ship, planet: Planet) {
+    fun execute() {
+        Networking.sendMoves(this.moveList)
+        this.moveList.clear()
+    }
+
+
+    private fun navigateToPlanet(ship: Ship, planet: Planet) {
         if (ship.canDock(planet)) {
             if (!planet.isOwned || intel.isOwn(planet)) {
                 val enemyShip = planet.nearbyEnemyShips.getOrNull(0)
@@ -34,7 +40,7 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
         }
     }
 
-    fun navigateToAttackPlanet(ship: Ship, planet: Planet) {
+    private fun navigateToAttackPlanet(ship: Ship, planet: Planet) {
         if (ship.withinDistance(planet, Constants.DOCK_RADIUS + 20.0)) {
             // Pick an enemy on the planet
             if (!planet.dockedShips.isEmpty()) {
@@ -65,12 +71,7 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
         }
     }
 
-    fun execute() {
-        Networking.sendMoves(this.moveList)
-        this.moveList.clear()
-    }
-
-    fun speed(ratio: Float): Int {
+    private fun speed(ratio: Float): Int {
         return Math.round(ratio * Constants.MAX_SPEED.toFloat())
     }
 }

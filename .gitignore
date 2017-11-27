@@ -21,4 +21,5 @@ gradle-app.setting
 # Halite stuff
 *.log
 *.hlt
+halite.exe
 hlt_client/
