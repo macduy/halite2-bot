@@ -23,7 +23,7 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
     private fun navigateToPlanet(ship: Ship, planet: Planet) {
         if (ship.canDock(planet)) {
             if (!planet.isOwned || intel.isOwn(planet)) {
-                val enemyShip = planet.nearbyEnemyShips.getOrNull(0)
+                val enemyShip = planet.nearbyEnemyShips.nearestTo(ship)
                 if (enemyShip != null) {
                     // Remove any enemies first
                     this.maybeAttackEnemy(ship, enemyShip)
