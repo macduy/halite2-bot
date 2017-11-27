@@ -107,10 +107,15 @@ class SettlePlanetObjective(planet: Planet): PlanetObjective(planet) {
 
         val settleBoost = if (intel.freePlanets.ratioOf(intel.totalPlanets) > freePlanetsThreshold) 400.0 else 0.0
         val distanceScore = Math.min(100.0, 700.0 / intel.kingdomCenter.getDistanceTo(this.planet))
+        val defenseMultiplier = 6.0 / intel.self.ships.size + 1.0
         val unsettledScore: Pair<Double, Int> = when {
             planet.isOwned -> when {
-                intel.isOwn(planet) ->
-                    Pair(planet.freeRatio * 150.0 + Math.sqrt(nearbyEnemyShips.toDouble()) * 350.0, planet.freeSpots + nearbyEnemyShips * 2)
+                intel.isOwn(planet) -> {
+                    val score = planet.freeRatio * 150.0 + Math.sqrt(nearbyEnemyShips.toDouble()) * 350.0 * defenseMultiplier
+                    val assignment = planet.freeSpots + nearbyEnemyShips * 2
+                    Pair(score, assignment)
+                }
+
                 else -> Pair(80.0, planet.dockingSpots + nearbyEnemyShips)
             }
 
@@ -152,7 +157,7 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
             }
         }
 
-        return Pair(attackBoost + distanceScore + occupyScore, assignment)
+        return Pair(attackBoost + distanceScore + occupyScore + enemyScore, assignment)
     }
 
     override fun toString() = "Attack ${this.planet.id}, has ${this.planet.dockedShips.count()} ships ${super.toString()}"
@@ -192,7 +197,7 @@ class EarlyAttackObjective: Objective() {
     override fun toString() = "EarlyAttack ${super.toString()}"
 
     companion object {
-        val EARLY_ATTACK_MAX_TURN = configFor(26, 20, 15)
+        val EARLY_ATTACK_MAX_TURN = configFor(26, 20, 18)
         val EARLY_ATTACK_ENEMY_LIMIT = configFor(6, 10, 12)
 
         val AVERAGE_SPEED = 5
