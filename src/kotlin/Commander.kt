@@ -98,7 +98,7 @@ class Commander(private val gameMap: GameMap): Intelligence {
     }
 
     fun updateNearbyEnemyShips() {
-        for (planet in this.ownedPlanets) {
+        for (planet in this.gameMap.planets.values) {
             this.gameMap.enemyShips.filterTo(planet.nearbyEnemyShips) { it.withinDistance(planet, 15.0) }
         }
     }

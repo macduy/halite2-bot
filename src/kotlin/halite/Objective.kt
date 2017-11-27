@@ -4,6 +4,7 @@ import center
 import com.sun.org.apache.xml.internal.utils.IntVector
 import nearestTo
 import ratioOf
+import java.lang.Math.sqrt
 import java.util.*
 
 interface Intelligence {
@@ -130,21 +131,24 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
 
         if (intel.isOwn(planet)) return Pair(0.0, 0)
 
+        val nearbyEnemies = planet.nearbyEnemyShips.size
+        val totalEnemyShips = planet.dockedShips.count() + nearbyEnemies
         val aggressive = (intel.freePlanets == 0)
+
         val attackBoost = if (aggressive) 500.0 else 0.0
         val distanceScore = Math.min(30.0, 100.0 / intel.kingdomCenter.getDistanceTo(this.planet))
-        val enemyShips = planet.dockedShips.count()
-        val occupyScore = if (enemyShips > 0) (5 - planet.dockedShips.count()) * 15.0 else 0.0
+        val occupyScore = if (totalEnemyShips > 0) (1 - planet.dockedRatio) * 80.0 else 0.0
+        val enemyScore = if (aggressive) sqrt(nearbyEnemies.toDouble()) * 100.0 else sqrt(nearbyEnemies.toDouble()) * -10.0
 
         val assignment: Int = when {
             intel.self.ships.count() < 2 * (intel.unownedPlanets * 4) -> {
-                val multiplier = if (aggressive) 5 else 3
-                planet.dockedShips.count() * multiplier
+                val multiplier = if (aggressive) 4 else 2
+                (planet.dockedShips.count() + nearbyEnemies) * multiplier
             }
 
             // When we have lots of ships
             else -> {
-                intel.self.ships.count() / intel.enemyPlanets
+                intel.self.ships.count() / intel.enemyPlanets + nearbyEnemies
             }
         }
 
