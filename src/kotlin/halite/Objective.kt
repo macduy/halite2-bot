@@ -91,7 +91,7 @@ abstract class PlanetObjective(var planet: Planet): Objective() {
 
     override fun distancePenalty(ship: Ship): Double {
         val distance = this.planet.getDistanceTo(ship)
-        return distance * 2
+        return Math.pow(distance / 5.0, 2.0)
     }
 }
 
@@ -190,7 +190,7 @@ class EarlyAttackObjective: Objective() {
     override fun toString() = "EarlyAttack ${super.toString()}"
 
     companion object {
-        val EARLY_ATTACK_MAX_TURN = configFor(30, 20, 15)
+        val EARLY_ATTACK_MAX_TURN = configFor(28, 20, 15)
         val EARLY_ATTACK_ENEMY_LIMIT = configFor(8, 10, 12)
 
         val AVERAGE_SPEED = 5

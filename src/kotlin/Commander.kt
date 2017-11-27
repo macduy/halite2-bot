@@ -74,7 +74,7 @@ class Commander(private val gameMap: GameMap): Intelligence {
         }
 
         if (bestObjective != null) {
-//            Log.log("Assigning ${ship.id} to $bestObjective with score $bestScore")
+            Log.log("Assigning ${ship.id} to $bestObjective with score $bestScore")
             bestObjective.assign(ship)
 
             if (!bestObjective.isFree()) {
