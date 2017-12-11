@@ -177,7 +177,7 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
 
 class TurtleShipObjective: Objective() {
     override fun onPreUpdate(intel: Intelligence): Boolean {
-        return (intel.gameMap.turn > 40) && (intel.self.ships.size < 5)
+        return ((intel.gameMap.turn > 50) && (intel.self.ships.size <= 5)) || ((intel.gameMap.turn > 100) && (intel.self.ships.size <= 8))
     }
 
     override fun distancePenalty(ship: Ship): Double {
@@ -186,7 +186,7 @@ class TurtleShipObjective: Objective() {
     }
 
     override fun computeScoreAndAllocation(intel: Intelligence): Pair<Double, Int> {
-        return 100000000.0 to 1
+        return 100000000.0 to 2
     }
 }
 
