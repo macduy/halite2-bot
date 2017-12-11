@@ -14,6 +14,7 @@ interface Intelligence {
     var enemyPlanets: Int
     var unownedPlanets: Int
 
+    val gameMap: GameMap
     val self: Player
     val players: Int
     val turn: Int
@@ -145,6 +146,9 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
         val occupyScore = if (totalEnemyShips > 0) (1 - planet.dockedRatio) * 80.0 else 0.0
         val enemyScore = if (aggressive) sqrt(nearbyEnemies.toDouble()) * 100.0 else sqrt(nearbyEnemies.toDouble()) * -10.0
 
+        // Attack strong enemies first
+        val enemyStrengthScore = this.enemyStrengthScore(intel)
+
         val assignment: Int = when {
             intel.self.ships.count() < 2 * (intel.unownedPlanets * 4) -> {
                 val multiplier = if (aggressive) 4 else 2
@@ -157,7 +161,15 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
             }
         }
 
-        return Pair(attackBoost + distanceScore + occupyScore + enemyScore, assignment)
+        return Pair(attackBoost + distanceScore + occupyScore + enemyScore + enemyStrengthScore, assignment)
+    }
+
+    private fun enemyStrengthScore(intel: Intelligence): Double {
+        if (intel.players == 2) return 0.0
+
+        val enemyOwner = intel.gameMap.getPlayer(this.planet.owner) ?: return 0.0
+
+        return 100.0 * Math.sqrt(enemyOwner.ships.size.toDouble())
     }
 
     override fun toString() = "Attack ${this.planet.id}, has ${this.planet.dockedShips.count()} ships ${super.toString()}"

@@ -1,7 +1,7 @@
 import halite.*
 import java.util.*
 
-class Commander(private val gameMap: GameMap): Intelligence {
+class Commander(override val gameMap: GameMap): Intelligence {
     override val self: Player get() = gameMap.myPlayer
 
     private var ownedPlanets = ArrayList<Planet>()
@@ -10,7 +10,6 @@ class Commander(private val gameMap: GameMap): Intelligence {
     override var totalPlanets: Int = 0
     override var enemyPlanets: Int = 0
     override var unownedPlanets: Int = 0
-
     override val players: Int get() = this.gameMap.players.size
     override val turn: Int get() = gameMap.turn
     override val enemyShips: List<Ship> get() = gameMap.enemyShips

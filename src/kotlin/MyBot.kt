@@ -3,7 +3,7 @@ import halite.*
 
 fun main(args: Array<String>) {
     val networking = Networking()
-    val gameMap = networking.initialize("BrokenSword5")
+    val gameMap = networking.initialize("BrokenSword6")
     val commander by lazy { Commander(gameMap) }
     val executor = Executor(gameMap, commander)
 

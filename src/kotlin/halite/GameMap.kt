@@ -55,6 +55,15 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
         return entitiesFound
     }
 
+    fun getPlayer(id: Int): Player? {
+        for (player in this.allPlayers) {
+            if (player.id == id) {
+                return player
+            }
+        }
+        return null
+    }
+
     private fun addEntitiesBetween(entitiesFound: MutableList<Entity>,
                                    start: Position, target: Position,
                                    entitiesToCheck: Collection<Entity>) {
