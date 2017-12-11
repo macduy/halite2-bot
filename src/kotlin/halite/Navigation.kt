@@ -6,7 +6,7 @@ class Navigation(private val ship: Ship, private val target: Entity, private val
 
     val random = Random()
 
-    fun navigateToDock(maxThrust: Int, angularStepMultiplier: Int = 1): ThrustMove? {
+    fun navigateToDock(maxThrust: Int = 7, angularStepMultiplier: Int = 1): ThrustMove? {
         val maxCorrections = Constants.MAX_NAVIGATION_CORRECTIONS / angularStepMultiplier
         val angularStepRad = Math.PI / 180.0 * angularStepMultiplier * scale()
         val targetPos = ship.getClosestPoint(target)

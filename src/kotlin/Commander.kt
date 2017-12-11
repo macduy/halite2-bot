@@ -33,6 +33,7 @@ class Commander(override val gameMap: GameMap): Intelligence {
     init {
         // Set up objectives for each planet
         this.objectives.add(EarlyAttackObjective())
+        this.objectives.add(TurtleShipObjective())
         for (planet in this.gameMap.planets.values) {
             this.objectives.add(SettlePlanetObjective(planet))
             this.objectives.add(AttackPlanetObjective(planet))

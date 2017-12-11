@@ -10,6 +10,7 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
             is SettlePlanetObjective -> this.navigateToPlanet(ship, objective.planet)
             is AttackPlanetObjective -> this.navigateToAttackPlanet(ship, objective.planet)
             is EarlyAttackObjective -> this.earlyAttackShips(ship, objective.target)
+            is TurtleShipObjective -> this.turtleShip(ship)
             null -> { }
         }
     }
@@ -18,7 +19,6 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
         Networking.sendMoves(this.moveList)
         this.moveList.clear()
     }
-
 
     private fun navigateToPlanet(ship: Ship, planet: Planet) {
         if (ship.canDock(planet)) {
@@ -54,6 +54,10 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
 
     private fun earlyAttackShips(ship: Ship, target: Ship?) {
         this.maybeAttackEnemy(ship, target)
+    }
+
+    private fun turtleShip(ship: Ship) {
+        this.addMove(Navigation(ship, GameMap.TOP_LEFT_CORNER.asFakeEntity(), gameMap).navigateToDock())
     }
 
     private fun maybeAttackEnemy(ship: Ship, enemyShip: Ship?) {

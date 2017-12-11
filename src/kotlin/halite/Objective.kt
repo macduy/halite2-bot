@@ -175,6 +175,21 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
     override fun toString() = "Attack ${this.planet.id}, has ${this.planet.dockedShips.count()} ships ${super.toString()}"
 }
 
+class TurtleShipObjective: Objective() {
+    override fun onPreUpdate(intel: Intelligence): Boolean {
+        return (intel.gameMap.turn > 40) && (intel.self.ships.size < 5)
+    }
+
+    override fun distancePenalty(ship: Ship): Double {
+        val distance = ship.getDistanceTo(GameMap.TOP_LEFT_CORNER)
+        return distance * distance
+    }
+
+    override fun computeScoreAndAllocation(intel: Intelligence): Pair<Double, Int> {
+        return 100000000.0 to 1
+    }
+}
+
 class EarlyAttackObjective: Objective() {
     var target: Ship? = null
 

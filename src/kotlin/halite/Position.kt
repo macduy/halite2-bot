@@ -55,4 +55,8 @@ open class Position(val xPos: Double, val yPos: Double) {
     override fun toString(): String {
         return "Position($xPos, $yPos)"
     }
+
+    fun asFakeEntity(): Entity {
+        return Entity(-1, 9999999, xPos, yPos, 0, Constants.SHIP_RADIUS)
+    }
 }

@@ -130,4 +130,8 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
 
         return this
     }
+
+    companion object {
+        val TOP_LEFT_CORNER = Position(2.0, 2.0)
+    }
 }
