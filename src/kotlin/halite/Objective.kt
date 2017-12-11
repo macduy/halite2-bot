@@ -169,7 +169,7 @@ class AttackPlanetObjective(planet: Planet) : PlanetObjective(planet) {
 
         val enemyOwner = intel.gameMap.getPlayer(this.planet.owner) ?: return 0.0
 
-        return 100.0 * Math.sqrt(enemyOwner.ships.size.toDouble())
+        return 40.0 * (Math.sqrt(enemyOwner.ships.size.toDouble()) - 1.0)
     }
 
     override fun toString() = "Attack ${this.planet.id}, has ${this.planet.dockedShips.count()} ships ${super.toString()}"
