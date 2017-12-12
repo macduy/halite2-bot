@@ -17,6 +17,10 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
     val futureShips: MutableList<FutureShip>
     var turn = 0
 
+    val topRightCorner = Position(this.width - 2.0, 2.0)
+    val bottomLeftCorner = Position(2.0, this.height - 2.0)
+    val bottomRightCorner = Position(this.width - 2.0, this.height - 2.0)
+
     // used only during parsing to reduce memory allocations
     private val currentShips = ArrayList<Ship>()
 
