@@ -25,7 +25,7 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
             if (!planet.isOwned || intel.isOwn(planet)) {
                 val enemyShip = planet.nearbyEnemyShips.nearestTo(ship)
                 if (enemyShip != null) {
-                    // Remove any enemies first
+                    // Remove any nearby enemies first
                     this.maybeAttackEnemy(ship, enemyShip)
                 } else {
                     this.addMove(DockMove(ship, planet))
@@ -43,8 +43,23 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
     private fun navigateToAttackPlanet(ship: Ship, planet: Planet) {
         if (ship.withinDistance(planet, Constants.DOCK_RADIUS + 20.0)) {
             // Pick an enemy on the planet
-            if (!planet.dockedShips.isEmpty()) {
-                this.maybeAttackEnemy(ship, gameMap.allShips[planet.dockedShips.first()])
+
+            // Otherwise pick nearest undocked enemy
+            val undockedEnemy = planet.nearbyEnemyShips.nearestTo(ship)
+            if (undockedEnemy != null) {
+                if (undockedEnemy.health > ship.health * 2) {
+                    // We are weaker, kamikaze
+                    Log.log("Kamikaze")
+                    this.addMove(Navigation(ship, undockedEnemy, gameMap).kamikazeEnemy())
+                } else {
+                    // Fight normally
+                    Log.log("Fight ship")
+                    this.addMove(Navigation(ship, undockedEnemy, gameMap).navigateToShootEnemy())
+                }
+            } else {
+                if (!planet.dockedShips.isEmpty()) {
+                    this.maybeAttackEnemy(ship, gameMap.allShips[planet.dockedShips.first()])
+                }
             }
         } else {
             // Navigate to the planet for attack

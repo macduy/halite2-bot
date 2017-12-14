@@ -10,7 +10,7 @@ class Navigation(private val ship: Ship, private val target: Entity, private val
         return navigateTowards(targetPos, maxThrust)
     }
 
-    fun navigateToShootEnemy(entitySelection: EntitySelection = EntitySelection.PLANETS_AND_ENEMY_SHIPS): ThrustMove? {
+    fun navigateToShootEnemy(entitySelection: EntitySelection = Flags.DEFAULT_COLLISION_DETECTION): ThrustMove? {
         return navigateTowards(ship.getClosestPoint(target, 1), Constants.MAX_SPEED, obstacleDetection=entitySelection)
     }
 
