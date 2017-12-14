@@ -109,6 +109,6 @@ class Navigation(private val ship: Ship, private val target: Entity, private val
     }
 
     companion object {
-        val VECTOR_ANGLE_DIFFERENTIAL = Math.PI / 180.0 * 45
+        val VECTOR_ANGLE_DIFFERENTIAL = Math.PI / 180.0 * 70
     }
 }
