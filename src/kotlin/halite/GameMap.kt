@@ -5,7 +5,7 @@ import java.util.TreeMap
 import java.util.Collections
 
 enum class EntitySelection {
-    ALL, PLANETS_AND_OWN_SHIPS
+    ALL, PLANETS_AND_OWN_SHIPS, PLANETS_AND_ENEMY_SHIPS
 }
 
 open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
@@ -53,20 +53,16 @@ open class GameMap(val width: Int, val height: Int, val myPlayerId: Int) {
                 addEntitiesBetween(entitiesFound, start, target, myPlayer.ships.values)
                 addEntitiesBetween(entitiesFound, start, target, futureShips)
             }
+            EntitySelection.PLANETS_AND_ENEMY_SHIPS -> {
+                addEntitiesBetween(entitiesFound, start, target, allPlanets.values)
+                addEntitiesBetween(entitiesFound, start, target, enemyShips)
+            }
         }
-
 
         return entitiesFound
     }
 
-    fun getPlayer(id: Int): Player? {
-        for (player in this.allPlayers) {
-            if (player.id == id) {
-                return player
-            }
-        }
-        return null
-    }
+    fun getPlayer(id: Int): Player? = this.allPlayers.firstOrNull { it.id == id }
 
     private fun addEntitiesBetween(entitiesFound: MutableList<Entity>,
                                    start: Position, target: Position,

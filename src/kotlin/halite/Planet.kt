@@ -28,9 +28,13 @@ class Planet(owner: Int, id: Int, xPos: Double, yPos: Double, health: Int,
     val nearbyEnemyShips = ArrayList<Ship>()
 
     override fun registerAngleOfApproach(angle: Double): Double {
-        val newAngle = getAngleOfApproach(angle)
-        intendedDockingAngles.add(newAngle)
-        return newAngle
+        if (Flags.SPREAD_PLANET_DOCKING) {
+            val newAngle = getAngleOfApproach(angle)
+            intendedDockingAngles.add(newAngle)
+            return newAngle
+        } else {
+            return angle
+        }
     }
 
     private fun getAngleOfApproach(initial: Double): Double {

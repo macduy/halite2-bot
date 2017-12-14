@@ -53,22 +53,30 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
     }
 
     private fun earlyAttackShips(ship: Ship, target: Ship?) {
-        this.maybeAttackEnemy(ship, target)
+        this.maybeAttackEnemy(ship, target, EntitySelection.ALL)
     }
 
     private fun turtleShip(ship: Ship, position: Position) {
         this.addMove(Navigation(ship, position.asFakeEntity(), gameMap).navigateToDock())
     }
 
-    private fun maybeAttackEnemy(ship: Ship, enemyShip: Ship?) {
+    private fun maybeAttackEnemy(ship: Ship, enemyShip: Ship?, entitySelection: EntitySelection = EntitySelection.ALL) {
         if (enemyShip != null) {
-            this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy())
+            this.addMove(Navigation(ship, enemyShip, gameMap).navigateToShootEnemy(entitySelection))
         }
     }
 
     private fun addMove(move: Move?) {
         if (move is ThrustMove) {
-            gameMap.futureShips.addAll(move.ship.futureShip(move))
+//            Log.log("Move ${move.ship.id} (angle=${move.angle})")
+
+            val futureShips = move.ship.futureShip(move)
+            gameMap.futureShips.addAll(futureShips)
+
+            if (!futureShips.isEmpty()) {
+                val lastShip = futureShips.last()
+                move.ship.futurePosition = Position(lastShip.xPos, lastShip.yPos)
+            }
         }
         if (move != null) {
             moveList.add(move)

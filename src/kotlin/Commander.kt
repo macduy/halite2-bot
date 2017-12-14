@@ -43,26 +43,6 @@ class Commander(override val gameMap: GameMap): Intelligence {
         }
     }
 
-    fun assignObjective(ship: Ship): Objective? {
-        val objective = getNextObjective()
-
-        if (objective != null) {
-            objective.assign(ship)
-            Log.log("Assign ${ship.id} to $objective ")
-        } else {
-            Log.log("Ship ${ship.id} ran of objectives!")
-        }
-
-        return objective
-    }
-
-    private fun getNextObjective(): Objective? {
-        for (objective in this.objectives) {
-            if (objective.isFree()) return objective
-        }
-        return null
-    }
-
     fun assignBestObjective(ship: Ship) {
         var bestObjective: Objective? = null
         var bestScore = Double.NEGATIVE_INFINITY
@@ -77,7 +57,7 @@ class Commander(override val gameMap: GameMap): Intelligence {
         }
 
         if (bestObjective != null) {
-            Log.log("Assigning ${ship.id} to $bestObjective with score $bestScore")
+//            Log.log("Assigning ${ship.id} to $bestObjective with score $bestScore")
             bestObjective.assign(ship)
 
             if (!bestObjective.isFree()) {

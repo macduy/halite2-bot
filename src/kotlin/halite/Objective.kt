@@ -207,7 +207,7 @@ class EarlyAttackObjective: Objective() {
 
         // Bail if we are too far away. Maximum distance depends on how many turns we got left to execute it.
         val maxDistance = Math.max(15.0, ((EARLY_ATTACK_MAX_TURN[intel.players] - intel.turn) * AVERAGE_SPEED).toDouble())
-        Log.log("EA: ${target.getDistanceTo(intel.kingdomCenter)} > $maxDistance")
+//        Log.log("EA: ${target.getDistanceTo(intel.kingdomCenter)} > $maxDistance")
         if (target.getDistanceTo(intel.kingdomCenter) > maxDistance) return false
 
         // Otherwise go for it!
