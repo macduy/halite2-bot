@@ -46,19 +46,19 @@ class Executor(private val gameMap: GameMap, private val intel: Intelligence) {
 
             // Otherwise pick nearest undocked enemy
             val undockedEnemy = planet.nearbyEnemyShips.nearestTo(ship)
-            if (undockedEnemy != null) {
-                if (undockedEnemy.health > ship.health * 2) {
-                    // We are weaker, kamikaze
-                    Log.log("Kamikaze")
-                    this.addMove(Navigation(ship, undockedEnemy, gameMap).kamikazeEnemy())
-                } else {
-                    // Fight normally
-                    Log.log("Fight ship")
-                    this.addMove(Navigation(ship, undockedEnemy, gameMap).navigateToShootEnemy())
-                }
+            if (!planet.dockedShips.isEmpty()) {
+                this.maybeAttackEnemy(ship, gameMap.allShips[planet.dockedShips.first()])
             } else {
-                if (!planet.dockedShips.isEmpty()) {
-                    this.maybeAttackEnemy(ship, gameMap.allShips[planet.dockedShips.first()])
+                if (undockedEnemy != null) {
+                    if (undockedEnemy.health > ship.health * 2) {
+                        // We are weaker, kamikaze
+                        Log.log("Kamikaze")
+                        this.addMove(Navigation(ship, undockedEnemy, gameMap).kamikazeEnemy())
+                    } else {
+                        // Fight normally
+                        Log.log("Fight ship")
+                        this.addMove(Navigation(ship, undockedEnemy, gameMap).navigateToShootEnemy())
+                    }
                 }
             }
         } else {
