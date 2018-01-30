@@ -1,5 +1,7 @@
 Bot for Halite 2 competition (http://halite.io) written in Kotlin, employing hand-coded human strategies. It is based-off the [Kotlin starter kit](https://github.com/HaliteChallenge/Halite-II/tree/master/airesources/Kotlin).
 
+![Bot demo](https://raw.githubusercontent.com/macduy/halite2-bot/master/halite2.gif)
+
 # Design
 
 Bot is driven by **objectives** which are assigned **scores** on every turn. The scores depend on various game statistics such as number of enemies, current turn number etc. as well as environmental stats, such as number of enemies in proximity of given planets.
@@ -22,7 +24,7 @@ The **Executor** then maneuvers the ships depending on their current objective. 
  
 ## 2 Player games
 
- - if the enemy is close enough, the bot will attempt to wipe them out immediately instead of settling
+ - if the enemy is close enough, the bot will attempt to rush them instead of settling
 
 # Navigation
 
